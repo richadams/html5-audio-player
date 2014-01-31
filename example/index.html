@@ -1,0 +1,109 @@
+<html>
+<head>
+    <title>Audio Player Example</title>
+    <link rel="stylesheet" type="text/css" media="all" href="style.css" />
+
+    <!-- Load dependencies -->
+    <script src="../src/player.js"    type="text/javascript"></script>
+    <script src="../src/playqueue.js" type="text/javascript"></script>
+    <script src="../src/track.js"     type="text/javascript"></script>
+
+    <!-- Here's where you setup your player. jQuery isn't required for the player to work,
+         just using it here to make things easier for updating the UI. -->
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script>
+    $(function()
+    {
+        // Create a player with some callbacks. If you have no UI to update, you don't need to
+        // specify any callbacks at all.
+        var player = new Player({
+            stopCallback:     cbPlayerStop,
+            playCallback:     cbPlayerPlay,
+            loadingCallback:  function() {},
+            progressCallback: cbPlayerProgress,
+            pauseCallback:    cbPlayerPause
+        });
+
+        // Create a play queue with some callbacks.
+        var playQueue  = new PlayQueue({
+            maxSize: 40, // Max number of items queue will allow.
+
+            // Start playing a track when it's popped from the queue.
+            popCallback: function(qiid, track)
+            {
+                player.playingTrack = $.extend(true, [], track);
+                player.play(track.audio, track.len);
+            }
+        });
+
+        // Make track objects for each file you want to play and add them to the Play Queue.
+        playQueue.push(new Track({
+            title: "Extreme Ways",
+            artist: "Moby",
+            len: 30,
+            // Using an iTunes preview clip as an example.
+            audio: "//a828.phobos.apple.com/us/r30/Music/63/82/d1/mzi.hztoxume.aac.p.m4a"
+        }));
+
+        ////////////////////////////////////////////////////////////////////////////////////////////
+        // Do whatever UI updates you need to do in the callbacks.
+        // If you don't want a UI for the player, then you don't need to specify any of these at all.
+
+        // When playback stops, we just want to reset the progress bar, then start playing the
+        // next item.
+        function cbPlayerStop()
+        {
+            // Reset UI
+            $("#progressBar").width("0px");
+
+            // Play next track if there is one.
+            playQueue.pop();
+        }
+
+        // When we start playback, we want to update our timer state.
+        function cbPlayerPlay()
+        {
+            $("#currentTime").html("0:00/" + formatTime(player.playingTrack.len));
+            $("#currentTime").removeClass("paused");
+        }
+
+        // As we progress through the track, we want to update our progress bar and timer state.
+        function cbPlayerProgress(currentPosition, audioLength)
+        {
+            var step = Math.ceil((700/audioLength) * currentPosition);
+            $("#progressBar").css("width", step + "px");
+            $("#currentTime").html("" + formatTime(currentPosition) + "/" + formatTime(audioLength));
+        }
+
+        // And finally, when paused, we just add a new CSS class to change the style.
+        function cbPlayerPause()
+        {
+            $("#currentTime").addClass("paused");
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////////////////
+        // Then setup any event listeners you want to trigger player actions.
+
+        // The play button triggers playback of the play queue by popping an item from the list.
+        $("#play").on("click", function() { playQueue.pop(); });
+
+        // The pause button simply toggles the pause state of the player.
+        $("#pause").on("click", function() { player.togglePause(); });
+    });
+
+    </script>
+
+</head>
+<body>
+
+    <section id="player">
+        <button id="play">Play</button>
+        <button id="pause">Pause</button>
+
+        <p id="currentTime">0:00/0:00</p>
+
+        <div id="progress"><span id="progressBar"></span></div>
+    </section>
+
+</body>
+</html>

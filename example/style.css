@@ -1,0 +1,34 @@
+/* Example style for a player, with a moving progress bar, etc. */
+
+#player {
+    border: 5px solid #aaa;
+    padding: 1em;
+    width: 710px;
+}
+
+#progress {
+    width: 700px;
+    border: 1px solid #f00;
+    height: 5px;
+    margin-top: 0.5em;
+    border-radius: 5px;
+}
+
+#progressBar {
+    height: 5px;
+    display: block;
+    background: #00f;
+    width: 0px;
+    transition: width 1s linear;
+    border-radius: 5px;
+}
+
+#currentTime {
+    float: right;
+    margin-top: 0.3em;
+    margin-right: 0.5em;
+}
+
+#currentTime.paused {
+    color: #f00;
+}
